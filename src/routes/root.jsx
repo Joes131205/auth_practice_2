@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import app from "../firebase";
 
 import { useNavigate, Link } from "react-router-dom";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 function Root() {
     const auth = getAuth();
