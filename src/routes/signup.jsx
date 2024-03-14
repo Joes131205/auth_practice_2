@@ -3,11 +3,12 @@ import { useNavigate, Link } from "react-router-dom";
 
 import app from "../firebase";
 
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 function SignUp() {
     const [data, setData] = useState({
-        photo: "",
         username: "",
         email: "",
         password: "",
@@ -15,34 +16,46 @@ function SignUp() {
     });
 
     const navigate = useNavigate();
-    const storage = getStorage();
+    const auth = getAuth();
+    const db = getFirestore(app);
+    const usersCollection = collection(db, "users");
+
+    const storeUsername = async (uid, username) => {
+        try {
+            await addDoc(usersCollection, {
+                uid,
+                username,
+            });
+            console.log("Username stored successfully");
+        } catch (error) {
+            console.error("Error storing username:", error);
+        }
+    };
 
     function handleChange(e) {
         console.log(e.target.name);
         const { name, value } = e.target;
-        if (name === "photo") {
-            const file = e.target.files[0];
-            if (file) {
-                setData({ ...data, [name]: file });
-            }
-        } else {
-            setData({ ...data, [name]: value });
-        }
+        setData({ ...data, [name]: value });
     }
     async function handleSubmit(e) {
         e.preventDefault();
-        const file = data.photo;
-
-        const storageRef = ref(storage, `images/${data.photo.name}`);
-
-        const metadata = {
-            contentType: file.type,
-        };
-
-        await uploadBytes(storageRef, file, metadata).then((snapshot) => {
-            console.log("Uploaded a file to:", snapshot.ref.fullPath);
-        });
-        console.log(data);
+        const { username, email, password, confirmPassword } = data;
+        if (password === confirmPassword) {
+            try {
+                const userCredential = await createUserWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+                const user = userCredential.user;
+                storeUsername(user.uid, username);
+            } catch (error) {
+                console.error("Error creating user:", error);
+            }
+        } else {
+            alert("Passwords do not match");
+            return;
+        }
     }
     return (
         <div className="h-screen flex flex-col items-center justify-center">
@@ -52,11 +65,6 @@ function SignUp() {
                 onSubmit={handleSubmit}
                 className="flex flex-col gap-10"
             >
-                <input
-                    type="file"
-                    accept="image/png, image/jpeg"
-                    name="photo"
-                />
                 <input
                     type="text"
                     placeholder="Username"
