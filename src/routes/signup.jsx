@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 import app from "../firebase";
 
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+    getAuth,
+    onAuthStateChanged,
+    createUserWithEmailAndPassword,
+} from "firebase/auth";
 
 function SignUp() {
     const [data, setData] = useState({
@@ -26,7 +30,7 @@ function SignUp() {
                 uid,
                 username,
             });
-            console.log("Username stored successfully");
+            console.log("Username stored successfully:", userRef.id);
         } catch (error) {
             console.error("Error storing username:", error);
         }
@@ -57,6 +61,14 @@ function SignUp() {
             return;
         }
     }
+
+    useEffect(() => {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                navigate("/");
+            }
+        });
+    }, []);
     return (
         <div className="h-screen flex flex-col items-center justify-center">
             <h1>Sign Up</h1>
