@@ -5,6 +5,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDoc, doc, collection, getFirestore } from "firebase/firestore";
 
+import Profile from "../Profile.jsx";
+
 function Root() {
     const auth = getAuth();
     const navigate = useNavigate();
@@ -56,6 +58,7 @@ function Root() {
     return (
         <div>
             <p>Root</p>
+            <Profile />
             <button onClick={handleSignOut}>Sign Out</button>
         </div>
     );

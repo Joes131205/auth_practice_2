@@ -35,7 +35,6 @@ function SignUp() {
             console.error("Error storing username:", error);
         }
     };
-
     function handleChange(e) {
         console.log(e.target.name);
         const { name, value } = e.target;
