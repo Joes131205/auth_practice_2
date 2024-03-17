@@ -3,7 +3,13 @@ import { useNavigate, Link } from "react-router-dom";
 
 import app from "../firebase";
 
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    setDoc,
+    doc,
+} from "firebase/firestore";
 
 import {
     getAuth,
@@ -22,21 +28,17 @@ function SignUp() {
     const navigate = useNavigate();
     const auth = getAuth();
     const db = getFirestore(app);
-    const usersCollection = collection(db, "users");
 
     const storeUsername = async (uid, username) => {
         try {
-            await addDoc(usersCollection, {
-                uid,
+            await setDoc(doc(db, "users", uid), {
                 username,
             });
-            console.log("Username stored successfully:", userRef.id);
         } catch (error) {
             console.error("Error storing username:", error);
         }
     };
     function handleChange(e) {
-        console.log(e.target.name);
         const { name, value } = e.target;
         setData({ ...data, [name]: value });
     }
