@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import app from "../firebase";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDoc, doc, collection, getFirestore } from "firebase/firestore";
 
@@ -58,6 +58,7 @@ function Root() {
             <p>Root</p>
             <p>Your username: {username}</p>
             <button onClick={handleSignOut}>Sign Out</button>
+            <Link to="/setting">Setting</Link>
         </div>
     );
 }

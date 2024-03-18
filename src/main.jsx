@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 import Root from "./routes/root";
 import SignIn from "./routes/signin";
 import SignUp from "./routes/signup";
+import Setting from "./routes/setting";
 
 import "./index.css";
 
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
     {
         path: "/signup",
         element: <SignUp />,
+    },
+    {
+        path: "/setting",
+        element: <Setting />,
     },
 ]);
 
