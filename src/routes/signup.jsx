@@ -3,13 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 
 import app from "../firebase";
 
-import {
-    getFirestore,
-    collection,
-    addDoc,
-    setDoc,
-    doc,
-} from "firebase/firestore";
+import { getFirestore, setDoc, doc } from "firebase/firestore";
 
 import {
     getAuth,

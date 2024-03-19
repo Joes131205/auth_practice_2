@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import app from "../firebase";
-import { onAuth, getAuth } from "firebase/auth";
-import { getFirestore, getDoc } from "firebase/firestore";
-import { getStorage, ref } from "firebase/storage";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, setDoc, doc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 
 function Setting() {
     const [data, setData] = useState({
@@ -20,30 +20,37 @@ function Setting() {
     function handleChange(e) {
         const { name, value } = e.target;
         if (name === "profilePicture") {
-            let reader = new FileReader();
             let image = e.target.files[0];
-            reader.onloadend = () => {
-                setData({
-                    ...data,
-                    [name]: reader.result,
-                });
-            };
-            if (image) {
-                reader.readAsDataURL(image);
-            }
+            const newFilename = `${auth.currentUser.uid}.${image.name
+                .split(".")
+                .pop()}`;
+            const newBlob = new Blob([image], { type: image.type });
+
+            newBlob.name = newFilename;
+            setData((prev) => ({ ...prev, [name]: newBlob }));
         } else {
             setData((prev) => ({ ...prev, [name]: value }));
         }
     }
-    function handleSubmit(e) {
+    async function changeProfilePicture(image) {
+        const storageRef = ref(storage, `profile-pictures/${image.name}`);
+        await uploadBytes(storageRef, image);
+    }
+    function changeUsername(username) {
+        setDoc(doc(db, "users", auth.currentUser.uid), {
+            username,
+        });
+    }
+    async function handleSubmit(e) {
         e.preventDefault();
-        const storageRef = ref(storage);
-        // TODO
+        await changeProfilePicture(data.profilePicture);
+        await changeUsername(data.username);
+        navigate(0);
     }
     useEffect(() => {
-        onAuthState(auth, (user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log(user);
+                console.log("hi");
             } else {
                 navigate("/signin");
             }
@@ -53,11 +60,20 @@ function Setting() {
         <div>
             <h1>Setting</h1>
             <form onChange={handleChange} onSubmit={handleSubmit}>
-                <label>Change Username</label>
-                <input type="text" name="username" />
+                <label for="username">
+                    Change Username
+                    <input type="text" name="username" id="username" />
+                </label>
 
-                <label>Change Profile Picture</label>
-                <input type="file" name="profilePicture" />
+                <label for="profilePicture">
+                    Change Profile Picture
+                    <input
+                        type="file"
+                        name="profilePicture"
+                        id="profilePicture"
+                    />
+                </label>
+                <button type="submit">Submit</button>
             </form>
             <Link to="/">Go back</Link>
         </div>
