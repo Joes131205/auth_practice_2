@@ -1,18 +1,17 @@
 import { useEffect, useState } from "react";
 import app from "../firebase";
 
-import ProfilePicture from "../ProfilePicture";
-
 import { useNavigate, Link } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDoc, doc, collection, getFirestore } from "firebase/firestore";
-import { getStorage, ref } from "firebase/storage";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 function Root() {
     const auth = getAuth();
     const navigate = useNavigate();
     const [uid, setUid] = useState("");
     const [username, setUsername] = useState("");
+    const [profilePictureUrl, setProfilePictureUrl] = useState("");
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -27,6 +26,7 @@ function Root() {
     const db = getFirestore(app);
     const storage = getStorage();
     const usersCollection = collection(db, "users");
+
     async function fetchUsername(currUid) {
         if (!currUid) {
             console.warn("uid is empty. Username cannot be fetched.");
@@ -54,9 +54,10 @@ function Root() {
         try {
             const profilePictureRef = await ref(
                 storage,
-                `profile-pictures/${uid}`
+                `profile-pictures/${uid}.png`
             );
-            console.log(profilePictureRef);
+            const profilePictureSnap = await getDownloadURL(profilePictureRef);
+            setProfilePictureUrl(profilePictureSnap);
         } catch (error) {
             console.error("Error fetching profile picture:", error);
         }
@@ -75,9 +76,10 @@ function Root() {
         <div>
             <p>Root</p>
             <p>Your username: {username}</p>
-            <ProfilePicture
-                uid={uid}
-                fetchProfilePicture={fetchProfilePicture}
+            <img
+                src={profilePictureUrl}
+                alt="Profile Picture"
+                className="w-24 h-24 rounded-full border-2 border-black"
             />
             <button onClick={handleSignOut}>Sign Out</button>
             <Link to="/setting">Setting</Link>
