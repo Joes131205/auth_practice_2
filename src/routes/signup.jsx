@@ -3,8 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 
 import app from "../firebase";
 
-import ProfilePicture from "../images/default_profile_picture.png";
-
 import { getFirestore, setDoc, doc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 
@@ -41,16 +39,22 @@ function SignUp() {
         setData({ ...data, [name]: value });
     }
     async function storeDefaultProfilePicture(uid) {
-        const response = await fetch("../images/default_profile_picture.png");
-        const blob = await response.blob();
-        const newFilename = `${uid}.${blob.type.split("/").pop()}`;
-        const storageRef = ref(storage, `profile-pictures/${newFilename}`);
-
-        const metadata = {
-            contentType: "image/png",
-        };
-
-        await uploadBytes(storageRef, blob, metadata);
+        try {
+            const imagePath = "/public/images/default_profile_picture.png";
+            const response = await fetch(imagePath);
+            if (!response.ok) {
+                throw new Error("Failed to fetch image");
+            }
+            const blob = await response.blob();
+            const newFilename = `${uid}.png`;
+            const storageRef = ref(storage, `profile-pictures/${newFilename}`);
+            const metadata = {
+                contentType: "image/png",
+            };
+            await uploadBytes(storageRef, blob, metadata);
+        } catch (error) {
+            console.error("Error storing default profile picture:", error);
+        }
     }
     async function handleSubmit(e) {
         e.preventDefault();
