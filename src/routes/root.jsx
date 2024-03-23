@@ -75,7 +75,7 @@ function Root() {
     return (
         <div>
             <p>Root</p>
-            <p>Your username: {username}</p>
+            <p>Hello, {username}!</p>
             <img
                 src={profilePictureUrl}
                 alt="Profile Picture"

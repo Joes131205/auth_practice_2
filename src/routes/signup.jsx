@@ -40,7 +40,7 @@ function SignUp() {
     }
     async function storeDefaultProfilePicture(uid) {
         try {
-            const imagePath = "/public/images/default_profile_picture.png";
+            const imagePath = "/images/default_profile_picture.png";
             const response = await fetch(imagePath);
             if (!response.ok) {
                 throw new Error("Failed to fetch image");
@@ -69,6 +69,9 @@ function SignUp() {
                 const user = userCredential.user;
                 await storeUsername(user.uid, username);
                 await storeDefaultProfilePicture(user.uid);
+                setInterval(() => {
+                    console.log("User Created");
+                }, 3000);
             } catch (error) {
                 console.error("Error creating user:", error);
             }

@@ -3,7 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 
 import app from "../firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, setDoc, doc } from "firebase/firestore";
+import {
+    getFirestore,
+    setDoc,
+    doc,
+    getDoc,
+    collection,
+} from "firebase/firestore";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 
 function Setting() {
@@ -36,8 +42,8 @@ function Setting() {
         const storageRef = ref(storage, `profile-pictures/${image.name}`);
         await uploadBytes(storageRef, image);
     }
-    function changeUsername(username) {
-        setDoc(doc(db, "users", auth.currentUser.uid), {
+    async function changeUsername(username) {
+        await setDoc(doc(db, "users", auth.currentUser.uid), {
             username,
         });
     }
@@ -48,9 +54,31 @@ function Setting() {
         navigate(0);
     }
     useEffect(() => {
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                console.log("hi");
+                const uid = user.uid;
+                const db = getFirestore(app);
+                const usersCollection = collection(db, "users");
+                try {
+                    const userDocRef = doc(usersCollection, uid);
+                    const userDocSnap = await getDoc(userDocRef);
+
+                    if (userDocSnap.exists) {
+                        const userData = userDocSnap.data();
+                        const userName = userData.username;
+                        setData((prevState) => ({
+                            ...prevState,
+                            username: userName,
+                        }));
+                        console.log(data);
+                    } else {
+                        console.log(
+                            "No user document found with the provided ID"
+                        );
+                    }
+                } catch (error) {
+                    console.error("Error fetching username:", error);
+                }
             } else {
                 navigate("/signin");
             }
